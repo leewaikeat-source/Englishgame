@@ -79,7 +79,7 @@ export async function logoutTeacher() { if (auth) await signOut(auth); }
 // Show only a bounded error code and helpful guidance, never raw request data.
 export function leaderboardError(error: unknown): string {
   const rawCode = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
-  const code = /^[a-z0-9/-]{1,80}$/.test(rawCode) ? rawCode : 'connection-error';
+  const code = /^[a-z0-9/.-]{1,80}$/.test(rawCode) ? rawCode : 'connection-error';
   const hints: Record<string, string> = {
     'auth/operation-not-allowed': 'Anonymous sign-in needs to be enabled in Firebase Authentication.',
     'auth/admin-restricted-operation': 'Check that Anonymous sign-in is enabled in Firebase Authentication.',
