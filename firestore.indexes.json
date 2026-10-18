@@ -1,0 +1,1 @@
+{"indexes":[{"collectionGroup":"leaderboard","queryScope":"COLLECTION","fields":[{"fieldPath":"correct","order":"DESCENDING"},{"fieldPath":"score","order":"DESCENDING"},{"fieldPath":"answerMs","order":"ASCENDING"}]}],"fieldOverrides":[]}
