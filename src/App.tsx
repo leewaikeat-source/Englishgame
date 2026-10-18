@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { advance, answer, asset, avatars, duration, localDate, newSession, questions, restore, stats, validName, type AvatarId, type Session } from './game';
-import { configured, identity, leaderboard, submit, type ScoreRow } from './online';
+import { configured, identity, leaderboard, submit, leaderboardError, type ScoreRow } from './online';
 import { downloadCertificate } from './certificate';
 import Scene from './Scene';
 import Teacher from './Teacher';
@@ -8,7 +8,7 @@ const STORAGE = 'haze-heroes-session-v1';
 function readSaved() { try { return restore(localStorage.getItem(STORAGE)); } catch { return null; } }
 function Leaderboard({ refresh }: { refresh: number }) {
   const [rows, setRows] = useState<ScoreRow[]>([]), [status, setStatus] = useState(configured ? 'Loading online scores…' : 'Online scores not configured'), [retry, setRetry] = useState(0);
-  useEffect(() => { let active = true; if (configured) { setStatus('Loading online scores…'); leaderboard().then(r => { if (active) { setRows(r); setStatus(r.length ? '' : 'No online scores yet. Be the first haze hero!'); } }).catch(() => { if (active) setStatus('Online scores are temporarily unavailable. Your mission still works.'); }); } return () => { active = false; }; }, [refresh, retry]);
+  useEffect(() => { let active = true; if (configured) { setStatus('Loading online scores…'); leaderboard().then(r => { if (active) { setRows(r); setStatus(r.length ? '' : 'No online scores yet. Be the first haze hero!'); } }).catch(error => { if (active) setStatus(leaderboardError(error)); }); } return () => { active = false; }; }, [refresh, retry]);
   return <section className="leaderboard panel" aria-labelledby="leaderboard-title"><div className="section-heading"><div><span className="eyebrow">THE CLEAR SKY CREW</span><h2 id="leaderboard-title">Hero leaderboard <span className="top-pill">TOP 10</span></h2></div><span className="small">Learn. Play. Rise together.</span></div><p className="small">{configured ? 'Shared scores · Unverified, client-reported results · Best per browser identity' : 'LOCAL MODE · Play the full game and save your certificate.'}</p>
     {status ? <div className="empty-board"><span aria-hidden="true">♧</span><strong>{status}</strong><p>Shared scores will appear here when online play is connected.</p>{configured && <button className="text-link" onClick={() => setRetry(n => n + 1)}>Retry leaderboard</button>}</div> : <ol className="scores">{rows.map((r, i) => <li key={r.uid}><span className="rank">{i + 1}</span><img src={asset(r.avatar)} alt=""/><strong>{r.name}</strong><span>{r.correct}/10 <small>correct</small></span><b>{r.score} <small>pts</small></b></li>)}</ol>}
     <p className="board-note">Ranked by correct answers, then points, then answer time. Identical results share the same performance; their display order may vary. Names do not uniquely identify students.</p>

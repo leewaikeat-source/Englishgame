@@ -75,3 +75,23 @@ export async function teacherAttempts(): Promise<Attempt[]> {
   }
 }
 export async function logoutTeacher() { if (auth) await signOut(auth); }
+
+// Show only a bounded error code and helpful guidance, never raw request data.
+export function leaderboardError(error: unknown): string {
+  const rawCode = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
+  const code = /^[a-z0-9/-]{1,80}$/.test(rawCode) ? rawCode : 'connection-error';
+  const hints: Record<string, string> = {
+    'auth/operation-not-allowed': 'Anonymous sign-in needs to be enabled in Firebase Authentication.',
+    'auth/admin-restricted-operation': 'Check that Anonymous sign-in is enabled in Firebase Authentication.',
+    'auth/invalid-api-key': 'Check the Firebase web API key in the GitHub repository variables, then rebuild the website.',
+    'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Check the Firebase web API key in the GitHub repository variables, then rebuild the website.',
+    'auth/unauthorized-domain': 'Add this website hostname to Firebase Authentication’s authorized domains.',
+    'auth/configuration-not-found': 'Check that Firebase Authentication is initialized in the project matching the website configuration.',
+    'permission-denied': 'Check the published Firestore rules and any enforced App Check settings.',
+    'failed-precondition': 'Check that the lowercase leaderboard index is enabled with the required field order.',
+    'auth/network-request-failed': 'Check your connection and whether Firebase requests are being blocked.',
+    'unavailable': 'Firebase is temporarily unreachable. Please retry shortly.',
+    'resource-exhausted': 'Firebase usage limits have been reached. The teacher can check the project’s quotas.',
+  };
+  return `Online scores unavailable (${code}). ${hints[code] ?? 'Please share this error code with your teacher to check the Firebase configuration.'} Your mission still works.`;
+}
